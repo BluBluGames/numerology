@@ -22,6 +22,17 @@
         />
       </div>
 
+      <div>
+        <label for="signature">Podpis:</label>
+        <input 
+          type="text" 
+          id="signature" 
+          v-model="signature" 
+          placeholder="Wprowadź podpis"
+          required
+        />
+      </div>
+
       <button type="submit">Oblicz Wibrację</button>
     </form>
 
@@ -47,7 +58,25 @@
         Wibracja Indywidualności: {{ individualityVibration }}
       </p>
       <p>
-        Wibracja Temperamentu i Uzdolnień: {{ temperamentVibration }}
+        Wibracja Temperamentu i Uzdolnień:
+        <ul>
+          <li>Mentalne: {{ temperamentVibration.mental }}</li>
+          <li>Emocjonalne: {{ temperamentVibration.emotional }}</li>
+          <li>Intuicyjne: {{ temperamentVibration.intuitive }}</li>
+          <li>Artystyczne: {{ temperamentVibration.artistic }}</li>
+          <li>Naukowe: {{ temperamentVibration.scientific }}</li>
+          <li>Związane z prowadzeniem interesów: {{ temperamentVibration.business }}</li>
+          <li>Fizyczne: {{ temperamentVibration.physical }}</li>
+        </ul>
+      </p>
+      <p>
+        Wibracja Podpisu: {{ signatureVibration }}
+      </p>
+      <p>
+        Potencjalne Przeznaczenie: {{ potentialDestiny }}
+      </p>
+      <p>
+        Przeznaczenie: {{ destiny }}
       </p>
     </div>
   </div>
@@ -55,23 +84,35 @@
 
 <script>
 export default {
-  name: "CalculateForm",
+  name: "NumerologyPortrait",
   data() {
     return {
       birthDate: "",
       fullName: "",
+      signature: "",
       vibrationResult: null,
       dayVibration: null,
       innerVibration: null,
       outerVibration: null,
       lifeGoalsVibration: null,
       individualityVibration: null,
-      temperamentVibration: {},
+      temperamentVibration: {
+        mental: 0,
+        emotional: 0,
+        intuitive: 0,
+        artistic: 0,
+        scientific: 0,
+        business: 0,
+        physical: 0,
+      },
+      signatureVibration: null,
+      potentialDestiny: null,
+      destiny: null,
     };
   },
   methods: {
     calculateVibration() {
-      if (!this.birthDate || !this.fullName) return;
+      if (!this.birthDate || !this.fullName || !this.signature) return;
 
       // Zamiana daty na cyfry i sumowanie ich
       const numbers = this.birthDate.replaceAll("-", "").split("").map(Number);
@@ -122,12 +163,33 @@ export default {
       this.individualityVibration = this.reduceToSingleDigit(totalSum);
 
       // Wibracja Temperamentu i Uzdolnień
-      this.temperamentVibration = letters
+      const frequency = letters
         .map((letter) => numerologyMap[letter] || 0)
         .reduce((acc, num) => {
           acc[num] = (acc[num] || 0) + 1;
           return acc;
         }, {});
+
+      this.temperamentVibration.mental = (frequency[1] || 0) + (frequency[7] || 0) + (frequency[8] || 0) + (frequency[9] || 0);
+      this.temperamentVibration.emotional = (frequency[2] || 0) + (frequency[3] || 0) + (frequency[6] || 0) + (frequency[9] || 0);
+      this.temperamentVibration.intuitive = (frequency[2] || 0) + (frequency[7] || 0) + (frequency[9] || 0);
+      this.temperamentVibration.artistic = (frequency[3] || 0) + (frequency[6] || 0) + (frequency[9] || 0);
+      this.temperamentVibration.scientific = (frequency[1] || 0) + (frequency[4] || 0) + (frequency[5] || 0) + (frequency[7] || 0) + (frequency[8] || 0) + (frequency[9] || 0);
+      this.temperamentVibration.business = (frequency[2] || 0) + (frequency[4] || 0) + (frequency[8] || 0);
+      this.temperamentVibration.physical = (frequency[4] || 0) + (frequency[5] || 0) + (frequency[8] || 0);
+
+      // Wibracja Podpisu
+      const signatureLetters = this.signature.replace(/\s+/g, "").toUpperCase().split("");
+      const signatureSum = signatureLetters
+        .map((letter) => numerologyMap[letter] || 0)
+        .reduce((acc, num) => acc + num, 0);
+      this.signatureVibration = this.reduceToSingleDigit(signatureSum);
+
+      // Potencjalne przeznaczenie
+      this.potentialDestiny = this.vibrationResult;
+
+      // Przeznaczenie
+      this.destiny = this.reduceToSingleDigit(this.vibrationResult + this.signatureVibration);
     },
     isMasterNumber(number) {
       return [11, 22, 33, 44].includes(number);

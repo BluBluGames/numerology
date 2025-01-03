@@ -1,14 +1,14 @@
 <template>
-  <CalculateForm/>
+  <NumerologyPortrait/>
 </template>
 
 <script>
-import CalculateForm from './components/CalculateForm.vue'
+import NumerologyPortrait from './components/NumerologyPortrait.vue'
 
 export default {
   name: 'App',
   components: {
-    CalculateForm
+    NumerologyPortrait
   }
 }
 </script>
